@@ -1,0 +1,448 @@
+/* W4 v0.1 — Excel → Markdown 樣式
+ * 設計原則:
+ *  - 單頁式 layout, drag-drop 上傳區佔主要視覺焦點
+ *  - 上傳後 split preview (左 HTML table, 右 Markdown code)
+ *  - 深淺色適配 (跟 W1/W2/W3 一致)
+ *  - 零外部字型, 純 system font stack
+ */
+
+:root {
+  --color-bg: #ffffff;
+  --color-bg-soft: #f5f5f7;
+  --color-fg: #1d1d1f;
+  --color-fg-soft: #6e6e73;
+  --color-border: #d2d2d7;
+  --color-primary: #0a84ff;
+  --color-primary-fg: #ffffff;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-card: #ffffff;
+  --color-card-hover: #f5f5f7;
+  --color-code-bg: #1c1c1e;
+  --color-code-fg: #f5f5f7;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --radius: 8px;
+  --radius-sm: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1c1c1e;
+    --color-bg-soft: #2c2c2e;
+    --color-fg: #f5f5f7;
+    --color-fg-soft: #98989d;
+    --color-border: #3a3a3c;
+    --color-card: #2c2c2e;
+    --color-card-hover: #3a3a3c;
+    --color-code-bg: #0f172a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang HK", "Microsoft JhengHei", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-fg);
+  background: var(--color-bg);
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* ==================== Header ==================== */
+.site-header {
+  background: linear-gradient(135deg, #1e40af, #1e3a8a);
+  color: #fff;
+  padding: 32px 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.site-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* ==================== Cards ==================== */
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card h2 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: var(--color-fg);
+}
+
+/* ==================== Drop zone ==================== */
+.drop-zone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius);
+  padding: 48px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  background: var(--color-bg-soft);
+}
+
+.drop-zone:hover,
+.drop-zone.dragging {
+  background: var(--color-card-hover);
+  border-color: var(--color-primary);
+}
+
+.drop-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.drop-text {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.drop-hint {
+  font-size: 12px;
+  color: var(--color-fg-soft);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+}
+
+.link-btn:hover {
+  text-decoration: none;
+}
+
+/* ==================== File info ==================== */
+.file-info {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-meta {
+  color: var(--color-fg-soft);
+  font-size: 12px;
+}
+
+/* ==================== Sheet tabs ==================== */
+.sheet-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 4px;
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  flex-wrap: wrap;
+}
+
+.sheet-tab {
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-fg-soft);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s, color 0.1s;
+}
+
+.sheet-tab:hover {
+  background: var(--color-card-hover);
+  color: var(--color-fg);
+}
+
+.sheet-tab.active {
+  background: var(--color-card);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* ==================== Options ==================== */
+.options {
+  padding: 12px 20px;
+}
+
+.options-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.options-row label {
+  font-size: 13px;
+  color: var(--color-fg-soft);
+}
+
+.options-row select {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+  color: var(--color-fg);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--color-fg-soft);
+}
+
+/* ==================== Result / Preview ==================== */
+.preview-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .preview-split { grid-template-columns: 1fr; }
+}
+
+.preview-pane h3 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-fg-soft);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preview-body {
+  max-height: 480px;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-soft);
+  padding: 8px;
+}
+
+.empty-hint {
+  color: var(--color-fg-soft);
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 13px;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.preview-table th,
+.preview-table td {
+  border: 1px solid var(--color-border);
+  padding: 4px 8px;
+  text-align: left;
+  white-space: nowrap;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-table th {
+  background: var(--color-card);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.preview-table tr:nth-child(even) td {
+  background: var(--color-card);
+}
+
+.md-output {
+  width: 100%;
+  height: 480px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-code-bg);
+  color: var(--color-code-fg);
+  font-family: "SF Mono", Menlo, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+  white-space: pre;
+  overflow: auto;
+}
+
+.md-output:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* ==================== Actions ==================== */
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-tertiary {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-primary-fg);
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-secondary {
+  background: var(--color-card);
+  color: var(--color-fg);
+  border-color: var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: var(--color-card-hover);
+}
+
+.btn-tertiary {
+  background: transparent;
+  color: var(--color-fg-soft);
+  border-color: transparent;
+}
+
+.btn-tertiary:hover {
+  color: var(--color-fg);
+  background: var(--color-bg-soft);
+}
+
+/* ==================== Loading & Error ==================== */
+.loading {
+  text-align: center;
+  padding: 16px;
+  color: var(--color-fg-soft);
+  font-size: 13px;
+}
+
+.loading::before {
+  content: "⏳ ";
+}
+
+.error-msg {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  color: var(--color-danger);
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+/* ==================== Toast ==================== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  background: var(--color-fg);
+  color: var(--color-bg);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  animation: toastIn 0.2s ease;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ==================== Footer ==================== */
+.site-footer {
+  margin-top: 40px;
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-fg-soft);
+}
+
+.site-footer p {
+  margin: 4px 0;
+}
+
+.site-footer a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
+.muted {
+  opacity: 0.7;
+}
+
+[hidden] {
+  display: none !important;
+}

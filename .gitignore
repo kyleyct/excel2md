@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (although we have no node deps, just in case)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test output
+test-output/
+*.test.js
+
+# Local-only test files (created during development, not part of deliverable)
+test-*.xlsx
+test-*.xls
+test-*.csv
+playwright-test.js

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Excel → Markdown 轉換器</title>
+  <meta name="description" content="將 .xlsx / .xls / .csv 轉成 Markdown 表格。純前端、零依賴、可離線、私隱友善。" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>Excel → Markdown 轉換器</h1>
+      <p class="subtitle">將 .xlsx / .xls / .csv 轉成 Markdown 表格 · 純前端 · 可離線使用 · 私隱友善</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Step 1: Upload -->
+    <section class="card upload-section">
+      <div id="drop-zone" class="drop-zone">
+        <div class="drop-icon">⬆</div>
+        <p class="drop-text">
+          <strong>拖拽檔案到呢度</strong> 或
+          <button type="button" class="link-btn">選擇檔案</button>
+        </p>
+        <p class="drop-hint">支援 .xlsx / .xls / .csv 格式 · 全部喺瀏覽器處理, 唔上傳</p>
+        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" hidden />
+      </div>
+      <div id="file-info" class="file-info hidden"></div>
+    </section>
+
+    <!-- Sheet tabs (only show for multi-sheet workbook) -->
+    <div id="sheet-tabs" class="sheet-tabs hidden"></div>
+
+    <!-- Step 2: Options -->
+    <section id="options-section" class="card options hidden">
+      <div class="options-row">
+        <label for="header-row-sel">
+          Header row (第幾行做標題):
+        </label>
+        <select id="header-row-sel">
+          <option value="auto">自動偵測</option>
+          <option value="0">第 1 行</option>
+          <option value="1">第 2 行</option>
+          <option value="2">第 3 行</option>
+          <option value="3">第 4 行</option>
+        </select>
+        <span id="total-rows-hint" class="hint hidden"></span>
+      </div>
+    </section>
+
+    <!-- Step 3: Preview + Markdown -->
+    <section id="result-section" class="card result">
+      <h2>預覽</h2>
+      <div class="preview-split">
+        <div class="preview-pane">
+          <h3>表格預覽 (HTML)</h3>
+          <div id="preview-body" class="preview-body">
+            <p class="empty-hint">請上傳 .xlsx / .xls / .csv 檔案</p>
+          </div>
+        </div>
+        <div class="preview-pane">
+          <h3>Markdown 原始碼</h3>
+          <textarea
+            id="md-output"
+            class="md-output"
+            readonly
+            placeholder="Markdown 表格會顯示喺呢度"></textarea>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="btn-copy" class="btn-primary" type="button">📋 複製 Markdown</button>
+        <button id="btn-download" class="btn-secondary" type="button">⬇ 下載 .md 檔案</button>
+        <button id="btn-reset" class="btn-tertiary" type="button">重設</button>
+      </div>
+    </section>
+
+    <div id="loading" class="loading hidden">載入中...</div>
+    <div id="error-msg" class="error-msg hidden"></div>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      技術: SheetJS (xlsx 0.18.5) ·
+      <a href="https://github.com/SheetJS/sheetjs" target="_blank" rel="noopener">SheetJS 官網</a>
+    </p>
+    <p class="muted">所有檔案處理都喺你嘅瀏覽器內完成, 唔上傳到任何伺服器。</p>
+    <p class="muted">8 週 AI × 教育 · W4 工具</p>
+  </footer>
+
+  <!-- Load order: vendor → parser → app -->
+  <script src="assets/vendor/xlsx.full.min.js"></script>
+  <script src="scripts/parser.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+</html>
