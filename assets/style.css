@@ -446,3 +446,8 @@ html, body {
 [hidden] {
   display: none !important;
 }
+
+/* .hidden class — 透過 JS classList 切換 (e.g. loading, file-info, sheet-tabs) */
+.hidden {
+  display: none !important;
+}

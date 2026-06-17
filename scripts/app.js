@@ -3,6 +3,21 @@
 (function () {
   'use strict';
 
+  // 初始化 log — 開 DevTools 見到呢行 = script 載入成功
+  console.log('[W4] app.js init start');
+
+  // 確認 SheetJS 已經載入
+  if (typeof window === 'undefined' || !window.XLSX) {
+    console.error('[W4] FATAL: window.XLSX not loaded. 檢查 xlsx.full.min.js 路徑');
+    const errEl = document.getElementById('error-msg');
+    if (errEl) {
+      errEl.textContent = '載入失敗: SheetJS library 缺失,請重新整理頁面';
+      errEl.classList.remove('hidden');
+    }
+    return;
+  }
+  console.log('[W4] SheetJS loaded:', window.XLSX.version);
+
   // ==================== Element refs ====================
   const $ = (id) => document.getElementById(id);
   const dropZone = $('drop-zone');
@@ -18,6 +33,14 @@
   const errorMsg = $('error-msg');
   const headerRowSel = $('header-row-sel');
   const totalRowsHint = $('total-rows-hint');
+
+  // 必須 element 嘅 null check (避免 silent fail)
+  const required = { dropZone, fileInput, previewBody, mdOutput, loading };
+  for (const [name, el] of Object.entries(required)) {
+    if (!el) {
+      console.error(`[W4] Missing required element: #${name}`);
+    }
+  }
 
   // ==================== State ====================
   const state = {
@@ -52,7 +75,16 @@
     if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
   });
 
-  // 點擊 drop-zone 觸發 file input
+  // 「選擇檔案」link button — explicit click handler
+  const linkBtn = dropZone.querySelector('.link-btn');
+  if (linkBtn) {
+    linkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();   // 唔好再 propagate 上去 dropZone
+      fileInput.click();
+    });
+  }
+
+  // 點擊 drop-zone 其他位置觸發 file input
   dropZone.addEventListener('click', (e) => {
     if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
       fileInput.click();

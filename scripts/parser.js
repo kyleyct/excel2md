@@ -98,11 +98,12 @@
   function sheetToJson(worksheet, options = {}) {
     const opts = Object.assign({}, DEFAULT_OPTIONS, options);
     let json;
-    if (worksheet) {
-      // 從 worksheet 直接
-      json = global.XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null, raw: false });
-    } else if (Array.isArray(worksheet)) {
+    if (Array.isArray(worksheet)) {
+      // 已係 2D array (例如 parseWorkbook 嘅 sheet.json)
       json = worksheet;
+    } else if (worksheet) {
+      // 從 worksheet object 解析 (SheetJS native)
+      json = global.XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null, raw: false });
     } else {
       throw new Error('sheetToJson expects worksheet or array');
     }
@@ -122,7 +123,10 @@
     const limitedRows = dataRows.slice(0, opts.maxRows);
     return {
       headers,
-      rows: limitedRows.map(row => (row || []).map(c => opts.trim && c ? String(c).trim() : c)),
+      rows: limitedRows.map(row => (row || []).map(c => {
+        if (c === null || c === undefined) return c;
+        return opts.trim ? String(c).trim() : c;
+      })),
       headerRow: headerIdx,
       totalRows: dataRows.length,
     };
