@@ -1,4 +1,4 @@
-# w4-excel2md
+# excel2md
 
 香港教師日常面對大量 Excel 成績表、學生名單、活動報名表。本工具將 `.xlsx` / `.xls` / `.csv` 喺瀏覽器內即時轉成 Markdown,直接貼到學校通告、文件、內部 wiki。
 
@@ -21,8 +21,8 @@
 
 ```bash
 # 1. 下載或 clone 本 repo
-git clone https://github.com/kyleyct/w4-excel2md.git
-cd w4-excel2md
+git clone https://github.com/kyleyct/excel2md.git
+cd excel2md
 
 # 2. 啟動本地 server
 ./start-demo.sh        # macOS / Linux
@@ -37,7 +37,7 @@ start-demo.bat         # Windows
 
 ### GitHub Pages (公開 demo)
 
-開 https://kyleyct.github.io/w4-excel2md/ 直接用,毋須安裝。
+開 https://kyleyct.github.io/excel2md/ 直接用,毋須安裝。
 
 **注意**: GitHub Pages 版會將檔案透過你部機嘅瀏覽器處理,實際運算喺 client side,無 server-side 上傳,符合私隱要求。詳見 [私隱與安全](#私隱與安全)。
 
@@ -77,7 +77,7 @@ start-demo.bat         # Windows
 ### 檔案結構
 
 ```
-w4-excel2md/
+excel2md/
 ├── index.html              # 單頁式 UI
 ├── assets/
 │   ├── style.css           # 樣式
