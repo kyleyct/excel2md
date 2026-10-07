@@ -10,8 +10,8 @@
 
 ```bash
 # 1. Clone repo
-git clone https://github.com/kyleyct/w4-excel2md.git
-cd w4-excel2md
+git clone https://github.com/kyleyct/excel2md.git
+cd excel2md
 
 # 2. 啟動 script 設定可執行權限
 chmod +x start-demo.sh
@@ -42,8 +42,8 @@ php -S localhost:8080
 
 ```cmd
 REM 1. Clone repo
-git clone https://github.com/kyleyct/w4-excel2md.git
-cd w4-excel2md
+git clone https://github.com/kyleyct/excel2md.git
+cd excel2md
 
 REM 2. 雙擊 start-demo.bat,或 cmd 執行
 start-demo.bat
@@ -80,7 +80,7 @@ A: 瀏覽器 CORS 政策禁止 file:// 讀取本地檔案,要用 http server。
 
 ### Q: 點解唔直接放 GitHub Pages?
 
-A: 已經有 — https://kyleyct.github.io/w4-excel2md/。但本地 demo 完全離線,適合處理高度敏感檔案。
+A: 已經有 — https://kyleyct.github.io/excel2md/。但本地 demo 完全離線,適合處理高度敏感檔案。
 
 ### Q: Excel 公式 (例如 =SUM(A1:A10)) 點處理?
 
@@ -101,15 +101,15 @@ A: 純 vanilla JS + SheetJS vendor,ES2020 瀏覽器原生支援,毋須 bundler�
 ## 更新
 
 ```bash
-cd w4-excel2md
+cd excel2md
 git pull origin main
 ```
 
 ## 卸載
 
 ```bash
-rm -rf w4-excel2md   # macOS / Linux
-rmdir /s /q w4-excel2md   # Windows
+rm -rf excel2md   # macOS / Linux
+rmdir /s /q excel2md   # Windows
 ```
 
 完全本地工具,毋須登出、取消訂閱、清除雲端資料。

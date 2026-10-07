@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Excel → Markdown 轉換器</title>
-  <meta name="description" content="將 .xlsx / .xls / .csv 轉成 Markdown 表格。純前端、零依賴、可離線、私隱友善。" />
+  <meta name="description" content="將 .xlsx / .xls / .csv 轉成 Markdown 表格。純前端、無需安裝、檔案不上傳、可離線使用。" />
   <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
@@ -25,7 +25,7 @@
           <button type="button" class="link-btn">選擇檔案</button>
         </p>
         <p class="drop-hint">支援 .xlsx / .xls / .csv 格式 · 全部喺瀏覽器處理, 唔上傳</p>
-        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" hidden />
+        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" aria-label="選擇 Excel / CSV 檔案" hidden />
       </div>
       <div id="file-info" class="file-info hidden"></div>
     </section>
@@ -65,6 +65,7 @@
           <textarea
             id="md-output"
             class="md-output"
+            aria-label="Markdown 原始碼"
             readonly
             placeholder="Markdown 表格會顯示喺呢度"></textarea>
         </div>
@@ -87,7 +88,7 @@
       <a href="https://github.com/SheetJS/sheetjs" target="_blank" rel="noopener">SheetJS 官網</a>
     </p>
     <p class="muted">所有檔案處理都喺你嘅瀏覽器內完成, 唔上傳到任何伺服器。</p>
-    <p class="muted">8 週 AI × 教育 · W4 工具</p>
+    <p class="muted">© Kyle Yeung</p>
   </footer>
 
   <!-- Load order: vendor → parser → app -->

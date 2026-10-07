@@ -1,8 +1,8 @@
-/* W4 v0.1 — Excel → Markdown 樣式
+/* Excel → Markdown 樣式
  * 設計原則:
  *  - 單頁式 layout, drag-drop 上傳區佔主要視覺焦點
  *  - 上傳後 split preview (左 HTML table, 右 Markdown code)
- *  - 深淺色適配 (跟 W1/W2/W3 一致)
+ *  - 深淺色適配 (prefers-color-scheme)
  *  - 零外部字型, 純 system font stack
  */
 

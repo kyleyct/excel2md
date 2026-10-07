@@ -1,10 +1,10 @@
 /**
  * parser.js — Excel / CSV → Markdown 純 function 模組
  *
- * v0.1 設計:
+ * 設計:
  *  - 純 function, 唔耦合 DOM
- *  - 將來 W7 (LLM 幻覺修正器) reuse: 加 validation layer
  *  - SheetJS 載入 window.XLSX 後即可用
+ *  - sheetToJson 回傳原始文字 (供 HTML 預覽); Markdown 跳脫只喺 rowsToMarkdown 做
  *
  * API:
  *   Excel2Md.parseWorkbook(arrayBuffer) -> Workbook
@@ -14,11 +14,6 @@
  *   Excel2Md.detectHeaderRow(rows) -> number
  *   Excel2Md.escapeCell(s) -> string
  *   Excel2Md.escapeHeader(s) -> string  (header 比 cell 嚴格, 因為含 `|` 容易斷)
- *
- * 將來 W7 集成:
- *   - rowsToMarkdown 加 column-validate option
- *   - parseWorkbook 加 anomaly-detection (e.g. column type mismatch)
- *   - 寫獨立 validator.js 喺 parser 之上
  */
 
 (function (global) {
@@ -113,7 +108,9 @@
     }
 
     const headerIdx = opts.headerRow !== null ? opts.headerRow : detectHeaderRow(json);
-    const headers = (json[headerIdx] || []).map(escapeHeader);
+    // 表頭保留原始文字 (只 trim); Markdown 跳脫留畀 rowsToMarkdown
+    const headers = (json[headerIdx] || []).map(h =>
+      (h === null || h === undefined) ? '' : String(h).trim());
     const dataRows = json.slice(headerIdx + 1).filter(row => {
       // 過濾完全空白嘅 row
       return row.some(c => c !== null && c !== undefined && String(c).trim() !== '');
@@ -140,12 +137,21 @@
     const opts = Object.assign({ emptyPlaceholder: '' }, options);
     if (!headers || !headers.length) return '';
 
-    // 計算每列寬度 (用於 alignment)
-    const colWidths = headers.map((h, ci) => {
+    // 先做 Markdown 跳脫 (headers / rows 傳入時係原始文字)
+    const mdHeaders = headers.map(escapeHeader);
+    const mdRows = rows.map(row => mdHeaders.map((_, i) => {
+      const raw = row[i];
+      if (raw === null || raw === undefined || String(raw).trim() === '') {
+        return String(opts.emptyPlaceholder);
+      }
+      return escapeCell(opts.trim ? String(raw).trim() : raw);
+    }));
+
+    // 計算每列寬度 (用於 alignment, 以跳脫後長度計)
+    const colWidths = mdHeaders.map((h, ci) => {
       let max = h.length;
-      for (const row of rows) {
-        const cell = row[ci] !== null && row[ci] !== undefined ? String(row[ci]) : '';
-        if (cell.length > max) max = cell.length;
+      for (const row of mdRows) {
+        if (row[ci].length > max) max = row[ci].length;
       }
       return Math.min(max, 50); // cap 50 chars for readability
     });
@@ -153,7 +159,7 @@
     const lines = [];
 
     // Header row
-    const headerLine = '| ' + headers.map((h, i) => padCell(h, colWidths[i])).join(' | ') + ' |';
+    const headerLine = '| ' + mdHeaders.map((h, i) => padCell(h, colWidths[i])).join(' | ') + ' |';
     lines.push(headerLine);
 
     // Alignment row (default left-aligned)
@@ -161,18 +167,8 @@
     lines.push(alignLine);
 
     // Data rows
-    for (const row of rows) {
-      const cells = colWidths.map((w, i) => {
-        const raw = row[i];
-        let cell;
-        if (raw === null || raw === undefined || String(raw).trim() === '') {
-          cell = opts.emptyPlaceholder;
-        } else {
-          cell = escapeCell(opts.trim ? String(raw).trim() : raw);
-        }
-        return padCell(cell, w);
-      });
-      lines.push('| ' + cells.join(' | ') + ' |');
+    for (const row of mdRows) {
+      lines.push('| ' + row.map((cell, i) => padCell(cell, colWidths[i])).join(' | ') + ' |');
     }
 
     return lines.join('\n');

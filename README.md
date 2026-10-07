@@ -2,17 +2,24 @@
 
 香港教師日常面對大量 Excel 成績表、學生名單、活動報名表。本工具將 `.xlsx` / `.xls` / `.csv` 喺瀏覽器內即時轉成 Markdown,直接貼到學校通告、文件、內部 wiki。
 
-**零依賴、零上傳、零追蹤** — 全部檔案喺你部電腦內處理,適合處理含學生個資、評估成績等敏感內容的試算表。
+**無需安裝、檔案不上傳、零追蹤** — 全部檔案喺你部電腦嘅瀏覽器內處理(用內置嘅 [SheetJS](https://github.com/SheetJS/sheetjs) 解析),適合處理含學生個資、評估成績等敏感內容的試算表。
+
+**🔗 Live Demo:<https://kyleyct.github.io/excel2md/>**
+
+![上載成績表後嘅預覽同 Markdown 原始碼](docs/screenshot-result.png)
+
+| 上載畫面 | 手機版 |
+|---|---|
+| <img src="docs/screenshot-upload.png" alt="上載畫面" width="520"> | <img src="docs/screenshot-mobile.png" alt="手機版" width="200"> |
 
 ## 功能
 
 - **拖拽即轉**: 拖 `.xlsx` / `.xls` / `.csv` 檔入上傳區,即時預覽 Markdown
 - **多 sheet 切換**: 工作簿內多個分頁逐個轉換,頂部 tab 切換
-- **表頭偵測**: 自動偵測前 2-3 行為表頭(用戶可手動覆寫)
-- **合併儲存格**: 自動用上方/左方儲存格填補(避免 markdown 表格斷裂)
-- **四種下載格式**: Markdown 文字、`.md` 檔案、ZIP(多 sheet)、複製到剪貼簿
-- **預覽分屏**: 左邊原 Excel 文字、右邊即時 Markdown
-- **自訂分隔符**: `|`(預設)、`\t`、`,`、`;` 任選
+- **表頭**: 以工作表第 1 行做表頭,其餘非空白行做資料行
+- **安全跳脫**: 儲存格內嘅 `|` 喺 Markdown 輸出自動跳脫為 `\|`,換行轉為空格,表格唔會斷裂
+- **兩種取用方式**: 複製到剪貼簿、下載 `.md` 檔案(目前分頁)
+- **預覽分屏**: 左邊 HTML 表格預覽、右邊 Markdown 原始碼
 - **離線可用**: 全部 script 喺前端,毋須後端伺服器
 
 ## 快速開始
@@ -57,15 +64,14 @@ start-demo.bat         # Windows
 
 ## 開發筆記
 
-本工具為 **8 週 AI × 教育計劃 W4** 嘅產出。整個計劃 roadmap 喺 [主 monorepo README](../../README.md)。
-
 ### 設計決策
 
 - **必要 + CSV 支援**: 用戶實際檔案有 .xls(舊版)、.xlsx(新版)、.csv(匯出)三種
 - **單頁式 layout**: drag-drop 即轉即預覽,毋須多頁導航
-- **SheetJS vendor 入 repo**: 0 外部依賴,離線可用,版本鎖定
+- **SheetJS vendor 入 repo**: 毋須連外部 CDN,離線可用,版本鎖定
 - **雙 deploy**: 本地 demo(私隱) + GitHub Pages(公開)
-- **parser.js module 化**: 7 個純 function 唔耦合 DOM,方便 W7 LLM Excel 幻覺修正器重用
+- **parser.js module 化**: 7 個純 function 唔耦合 DOM,方便測試同重用
+- **跳脫只喺輸出做**: parser 保留原始文字畀 HTML 預覽,`rowsToMarkdown` 先至做 Markdown 跳脫
 
 ### 技術棧
 
@@ -87,7 +93,8 @@ excel2md/
 │   ├── parser.js           # 7 個純 function API
 │   └── app.js              # UI controller (drag-drop, tabs, etc.)
 ├── docs/
-│   └── install.md          # 安裝細節
+│   ├── install.md          # 安裝細節
+│   └── screenshot-*.png    # README 截圖
 ├── start-demo.sh           # macOS / Linux 一鍵啟動
 ├── start-demo.bat          # Windows 一鍵啟動
 ├── README.md               # 本檔案
@@ -98,38 +105,42 @@ excel2md/
 ### 7 個 Parser API
 
 ```js
-// 從 File 物件或 ArrayBuffer 解析 workbook
-parseWorkbook(file) → Promise<{sheetNames, sheets}>
+// 從 ArrayBuffer / Uint8Array 解析 workbook
+Excel2Md.parseWorkbook(data) → {workbook, sheets: [{name, json, worksheet}]}
 
-// 整本 workbook 轉成單一 markdown
-workbookToMarkdown(workbook, opts) → string
+// 整本 workbook 轉成單一 markdown(每個 sheet 一節)
+Excel2Md.workbookToMarkdown(parsed, opts) → string
 
-// 單個 sheet 轉 markdown
-sheetToJson(sheet, opts) → {header, rows}
+// 單個 sheet(或二維 array)轉成表頭 + 資料行(原始文字,未跳脫)
+Excel2Md.sheetToJson(sheetOrRows, opts) → {headers, rows, headerRow, totalRows}
 
-// 二維 array 轉 markdown table
-rowsToMarkdown({header, rows}, delimiter) → string
+// 表頭 + 資料行轉 markdown table(喺呢度做跳脫)
+Excel2Md.rowsToMarkdown(headers, rows, opts) → string
 
 // 自動偵測哪一行係表頭
-detectHeaderRow(rows) → number
+Excel2Md.detectHeaderRow(rows) → number
 
-// 儲存格內容 escape (避免 markdown 破壞)
-escapeCell(value) → string
+// 儲存格內容 escape(`|` → `\|`,換行 → 空格)
+Excel2Md.escapeCell(value) → string
 
-// 表頭 escape (避免 pipe 撞 delimiter)
-escapeHeader(name) → string
+// 表頭 escape(同上,另加 trim)
+Excel2Md.escapeHeader(name) → string
 ```
 
-所有 API 純 function,毋須 DOM,可直接 import 到 Node.js / 其他前端框架重用。
+所有 API 為純 function,毋須 DOM;喺 Node.js 使用時需先將 SheetJS 設為 global `XLSX`。
 
 ## 貢獻
 
 歡迎 fork + PR!請遵守:
-- 保持 0 外部依賴(vendor 入 repo)
+- 唔加外部 CDN 依賴(第三方庫 vendor 入 repo)
 - 保持私隱取向(無追蹤、無 CDN、無 analytics)
 - 保持香港繁體書面語(對外文件)
 - 保持 mobile-responsive
 
 ## 授權
 
-[MIT](LICENSE) © 2026 Kyle YC Tam
+[MIT](LICENSE)
+
+## 作者
+
+© [Kyle Yeung](https://github.com/kyleyct)

@@ -1,5 +1,5 @@
 #!/bin/bash
-# start-demo.sh — W4 Excel → Markdown 本地啟動腳本
+# start-demo.sh — Excel → Markdown 本地啟動腳本
 # 用法: ./start-demo.sh
 # 開瀏覽器: http://localhost:8080/
 
@@ -8,7 +8,7 @@ PORT=${1:-8080}
 DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=========================================="
-echo "  W4 Excel → Markdown — 本地 Demo"
+echo "  Excel → Markdown — 本地 Demo"
 echo "=========================================="
 echo ""
 echo "啟動目錄: $DIR"
