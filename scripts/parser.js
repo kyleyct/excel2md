@@ -2,9 +2,9 @@
  * parser.js — Excel / CSV → Markdown 純 function 模組
  *
  * 設計:
- *  - 純 function, 唔耦合 DOM
+ *  - 純 function，不耦合 DOM
  *  - SheetJS 載入 window.XLSX 後即可用
- *  - sheetToJson 回傳原始文字 (供 HTML 預覽); Markdown 跳脫只喺 rowsToMarkdown 做
+ *  - sheetToJson 回傳原始文字（供 HTML 預覽）；Markdown 跳脫只在 rowsToMarkdown 做
  *
  * API:
  *   Excel2Md.parseWorkbook(arrayBuffer) -> Workbook
@@ -22,7 +22,7 @@
   // 預設值
   const DEFAULT_OPTIONS = {
     headerRow: null,            // null = auto-detect, 數字 = 指定 row index
-    emptyPlaceholder: '',      // 空 cell 顯示咩
+    emptyPlaceholder: '',      // 空 cell 顯示甚麼
     trim: true,                 // cell 自動 trim
     maxRows: 10000,             // safety: 避免 memory 爆
   };
@@ -50,7 +50,7 @@
   /**
    * Auto-detect header row
    * 啟發: 第一行 non-empty row
-   * 進一步啟發: 該行 average non-empty cells > 50% AND cells 唔似 data (e.g. 全係數字)
+   * 進一步啟發: 該行 average non-empty cells > 50% AND cells 不像 data（例如全是數字）
    */
   function detectHeaderRow(rows, maxCheck = 5) {
     if (!rows || !rows.length) return 0;
@@ -85,7 +85,7 @@
   }
 
   /**
-   * 將 sheet 嘅 json 轉做 { headers, rows } 結構
+   * 將 sheet 的 json 轉成 { headers, rows } 結構
    * - 自動偵測 header row
    * - 過濾空 row
    * - 限制 max rows (防 memory 爆)
@@ -94,7 +94,7 @@
     const opts = Object.assign({}, DEFAULT_OPTIONS, options);
     let json;
     if (Array.isArray(worksheet)) {
-      // 已係 2D array (例如 parseWorkbook 嘅 sheet.json)
+      // 已是 2D array（例如 parseWorkbook 的 sheet.json）
       json = worksheet;
     } else if (worksheet) {
       // 從 worksheet object 解析 (SheetJS native)
@@ -108,11 +108,11 @@
     }
 
     const headerIdx = opts.headerRow !== null ? opts.headerRow : detectHeaderRow(json);
-    // 表頭保留原始文字 (只 trim); Markdown 跳脫留畀 rowsToMarkdown
+    // 表頭保留原始文字（只 trim）；Markdown 跳脫留給 rowsToMarkdown
     const headers = (json[headerIdx] || []).map(h =>
       (h === null || h === undefined) ? '' : String(h).trim());
     const dataRows = json.slice(headerIdx + 1).filter(row => {
-      // 過濾完全空白嘅 row
+      // 過濾完全空白的 row
       return row.some(c => c !== null && c !== undefined && String(c).trim() !== '');
     });
 
@@ -197,7 +197,7 @@
       sections.push(`${sectionTitle}\n\n${md}${note}`);
     }
     if (!sections.length) {
-      return '_空 workbook (冇 sheet 或全部 sheet 空)_';
+      return '_空 workbook（沒有 sheet 或全部 sheet 為空）_';
     }
     return sections.join('\n\n---\n\n');
   }

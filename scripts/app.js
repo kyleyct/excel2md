@@ -30,7 +30,7 @@
   const headerRowSel = $('header-row-sel');
   const totalRowsHint = $('total-rows-hint');
 
-  // 必須 element 嘅 null check (避免 silent fail)
+  // 必須 element 的 null check（避免 silent fail）
   const required = { dropZone, fileInput, previewBody, mdOutput, loading };
   for (const [name, el] of Object.entries(required)) {
     if (!el) {
@@ -75,7 +75,7 @@
   const linkBtn = dropZone.querySelector('.link-btn');
   if (linkBtn) {
     linkBtn.addEventListener('click', (e) => {
-      e.stopPropagation();   // 唔好再 propagate 上去 dropZone
+      e.stopPropagation();   // 不要再 propagate 上去 dropZone
       fileInput.click();
     });
   }
